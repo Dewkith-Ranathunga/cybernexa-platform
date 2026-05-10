@@ -15,17 +15,23 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
 
-  // GSAP: staggered entrance animation
+  // GSAP: staggered entrance animation using timeline
   useEffect(() => {
     if (!formRef.current) return
     const elements = formRef.current.querySelectorAll('.animate-in')
-    gsap.from(elements, {
-      y: 30,
-      opacity: 0,
-      duration: 0.6,
-      stagger: 0.1,
-      ease: 'power3.out',
-    })
+
+    const tl = gsap.timeline()
+    tl.from(formRef.current, { opacity: 0, y: 20, duration: 0.4, ease: 'power2.out' }).from(
+      elements,
+      {
+        y: 30,
+        opacity: 0,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: 'power3.out',
+      },
+      '-=0.2',
+    )
   }, [])
 
   async function handleSubmit(e: React.FormEvent) {
@@ -47,18 +53,31 @@ export default function RegisterPage() {
         return
       }
 
-      // GSAP: success animation then redirect
+      // GSAP: success animation then redirect using timeline
       setSuccess(true)
       const btn = formRef.current?.querySelector('.btn')
-      gsap.to(btn, {
+
+      const tl = gsap.timeline({
+        onComplete: () => {
+          router.push('/login')
+        },
+      })
+
+      tl.to(btn, {
         scale: 1.05,
         duration: 0.2,
         yoyo: true,
         repeat: 1,
-        onComplete: () => {
-          setTimeout(() => router.push('/login'), 800)
+      }).to(
+        formRef.current,
+        {
+          opacity: 0,
+          scale: 0.95,
+          duration: 0.3,
+          ease: 'power2.in',
         },
-      })
+        '+=0.1',
+      )
     } catch {
       setError('Something went wrong. Try again.')
       setLoading(false)

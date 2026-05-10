@@ -14,17 +14,23 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  // GSAP: staggered entrance
+  // GSAP: staggered entrance using timeline
   useEffect(() => {
     if (!formRef.current) return
     const elements = formRef.current.querySelectorAll('.animate-in')
-    gsap.from(elements, {
-      y: 30,
-      opacity: 0,
-      duration: 0.6,
-      stagger: 0.1,
-      ease: 'power3.out',
-    })
+
+    const tl = gsap.timeline()
+    tl.from(formRef.current, { opacity: 0, y: 20, duration: 0.4, ease: 'power2.out' }).from(
+      elements,
+      {
+        y: 30,
+        opacity: 0,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: 'power3.out',
+      },
+      '-=0.2',
+    )
   }, [])
 
   async function handleSubmit(e: React.FormEvent) {
@@ -49,12 +55,9 @@ export default function LoginPage() {
       // Save the JWT token
       saveToken(data.token)
 
-      // GSAP: slide out before redirect
-      gsap.to(formRef.current, {
-        y: -20,
-        opacity: 0,
-        duration: 0.4,
-        ease: 'power2.in',
+      // GSAP: slide out before redirect using timeline
+      const elements = formRef.current?.querySelectorAll('.animate-in')
+      const tl = gsap.timeline({
         onComplete: () => {
           const role = data.user?.role
           if (role === 'admin') {
@@ -64,6 +67,23 @@ export default function LoginPage() {
           }
         },
       })
+
+      tl.to(elements ? Array.from(elements).reverse() : [], {
+        y: -10,
+        opacity: 0,
+        duration: 0.2,
+        stagger: 0.05,
+        ease: 'power2.in',
+      }).to(
+        formRef.current,
+        {
+          opacity: 0,
+          scale: 0.95,
+          duration: 0.3,
+          ease: 'power2.in',
+        },
+        '-=0.1',
+      )
     } catch {
       setError('Something went wrong. Try again.')
       setLoading(false)
