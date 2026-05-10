@@ -14,7 +14,7 @@ export default function LogoutButton() {
     const tl = gsap.timeline({
       onComplete: () => {
         removeToken()
-        window.location.href = '/login'
+        router.push('/login')
       },
     })
 

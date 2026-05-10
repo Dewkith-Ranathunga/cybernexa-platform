@@ -57,11 +57,14 @@ export default function RegisterPage() {
       setSuccess(true)
       const btn = formRef.current?.querySelector('.btn')
 
-      const tl = gsap.timeline({
-        onComplete: () => {
-          window.location.href = '/login'
-        },
-      })
+      let didRedirect = false
+      const redirect = () => {
+        if (didRedirect) return
+        didRedirect = true
+        router.push('/login')
+      }
+
+      const tl = gsap.timeline({ onComplete: redirect })
 
       tl.to(btn, {
         scale: 1.05,
@@ -78,6 +81,9 @@ export default function RegisterPage() {
         },
         '+=0.1',
       )
+
+      // Fallback redirect in case the timeline is interrupted
+      window.setTimeout(redirect, 700)
     } catch {
       setError('Something went wrong. Try again.')
       setLoading(false)
