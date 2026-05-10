@@ -60,21 +60,21 @@ export default function LoginPage() {
       const tl = gsap.timeline({
         onComplete: () => {
           const role = data.user?.role
-          if (role === 'admin') {
-            router.push('/dashboard/admin')
-          } else {
-            router.push('/dashboard/user')
-          }
+          router.push(role === 'admin' ? '/dashboard/admin' : '/dashboard/user')
         },
       })
 
-      tl.to(elements ? Array.from(elements).reverse() : [], {
-        y: -10,
-        opacity: 0,
-        duration: 0.2,
-        stagger: 0.05,
-        ease: 'power2.in',
-      }).to(
+      if (elements && elements.length > 0) {
+        tl.to(Array.from(elements).reverse(), {
+          y: -10,
+          opacity: 0,
+          duration: 0.2,
+          stagger: 0.05,
+          ease: 'power2.in',
+        })
+      }
+
+      tl.to(
         formRef.current,
         {
           opacity: 0,
@@ -120,7 +120,7 @@ export default function LoginPage() {
           </div>
 
           <button className="btn animate-in" type="submit" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign in'}
+            {loading ? 'Logging in...' : 'Log in'}
           </button>
 
           {error && <p className="error-msg">{error}</p>}
