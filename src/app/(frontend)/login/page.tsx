@@ -14,6 +14,44 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
+  const navigateWithTransition = (target: string) => {
+    const container = formRef.current
+    if (!container) {
+      router.push(target)
+      return
+    }
+
+    const items = container.querySelectorAll('.animate-in')
+    const tl = gsap.timeline({ onComplete: () => router.push(target) })
+
+    if (items.length > 0) {
+      tl.to(Array.from(items).reverse(), {
+        y: -10,
+        opacity: 0,
+        duration: 0.2,
+        stagger: 0.05,
+        ease: 'power2.in',
+      })
+    }
+
+    tl.to(
+      container,
+      {
+        opacity: 0,
+        scale: 0.98,
+        duration: 0.25,
+        ease: 'power2.in',
+      },
+      '-=0.1',
+    )
+
+    window.setTimeout(() => {
+      if (window.location.pathname !== target) {
+        window.location.assign(target)
+      }
+    }, 700)
+  }
+
   // GSAP: staggered entrance using timeline
   useEffect(() => {
     if (!formRef.current) return
@@ -55,47 +93,23 @@ export default function LoginPage() {
       // Save the JWT token
       saveToken(data.token)
 
-      // GSAP: slide out before redirect using timeline
-      const elements = formRef.current?.querySelectorAll('.animate-in')
-      let didRedirect = false
-      const role = data.user?.role
-      const target = role === 'admin' ? '/dashboard/admin' : '/dashboard/user'
-      const redirect = () => {
-        if (didRedirect) return
-        didRedirect = true
-        router.push(target)
-      }
-
-      const tl = gsap.timeline({ onComplete: redirect })
-
-      if (elements && elements.length > 0) {
-        tl.to(Array.from(elements).reverse(), {
-          y: -10,
-          opacity: 0,
-          duration: 0.2,
-          stagger: 0.05,
-          ease: 'power2.in',
+      // Resolve role from /me to avoid missing role in login response
+      let target = data.user?.role === 'admin' ? '/dashboard/admin' : '/dashboard/user'
+      try {
+        const meRes = await fetch('/api/users/me', {
+          headers: { Authorization: `JWT ${data.token}` },
         })
+        if (meRes.ok) {
+          const meData = await meRes.json()
+          const meRole = meData?.user?.role
+          target = meRole === 'admin' ? '/dashboard/admin' : '/dashboard/user'
+        }
+      } catch {
+        // Keep default target on error
       }
 
-      tl.to(
-        formRef.current,
-        {
-          opacity: 0,
-          scale: 0.95,
-          duration: 0.3,
-          ease: 'power2.in',
-        },
-        '-=0.1',
-      )
-
-      // Fallback redirect in case the timeline is interrupted
-      window.setTimeout(redirect, 700)
-      window.setTimeout(() => {
-        if (window.location.pathname !== target) {
-          window.location.assign(target)
-        }
-      }, 1200)
+      // GSAP: slide out before redirect using timeline
+      navigateWithTransition(target)
     } catch {
       setError('Something went wrong. Try again.')
       setLoading(false)
@@ -139,7 +153,16 @@ export default function LoginPage() {
         </form>
 
         <p className="link-text animate-in">
-          No account yet? <Link href="/register">Create one</Link>
+          No account yet?{' '}
+          <Link
+            href="/register"
+            onClick={(e) => {
+              e.preventDefault()
+              if (!loading) navigateWithTransition('/register')
+            }}
+          >
+            Create one
+          </Link>
         </p>
       </div>
     </div>

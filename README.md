@@ -36,7 +36,7 @@ This user automatically gets admin access to the platform.
 
 1. **Staggered form entrance** — on /register and /login, each field and the CTA button animate in sequentially using `gsap.from()` with a 0.1s stagger. Chosen to give the form a polished, intentional feel.
 
-2. **Page exit transition** — on login success and logout, the card/page fades and slides out before the route changes using `gsap.to()`. Chosen to avoid jarring instant navigations.
+2. **Timeline-based page transitions** — register/login link clicks and post-submit redirects use `gsap.timeline()` to orchestrate exit sequences before navigation (Register ↔ Login and Login → Dashboard). Chosen to make navigation feel smooth and intentional.
 
 3. **Dashboard card entrance** — on both dashboards, stat cards and the users table animate in from below on mount. Chosen so content doesn't just "pop" into existence.
 

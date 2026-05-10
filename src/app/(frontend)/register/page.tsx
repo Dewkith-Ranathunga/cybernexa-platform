@@ -15,6 +15,44 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
 
+  const navigateWithTransition = (target: string) => {
+    const container = formRef.current
+    if (!container) {
+      router.push(target)
+      return
+    }
+
+    const items = container.querySelectorAll('.animate-in')
+    const tl = gsap.timeline({ onComplete: () => router.push(target) })
+
+    if (items.length > 0) {
+      tl.to(Array.from(items).reverse(), {
+        y: -10,
+        opacity: 0,
+        duration: 0.2,
+        stagger: 0.05,
+        ease: 'power2.in',
+      })
+    }
+
+    tl.to(
+      container,
+      {
+        opacity: 0,
+        scale: 0.98,
+        duration: 0.25,
+        ease: 'power2.in',
+      },
+      '-=0.1',
+    )
+
+    window.setTimeout(() => {
+      if (window.location.pathname !== target) {
+        window.location.assign(target)
+      }
+    }, 700)
+  }
+
   // GSAP: staggered entrance animation using timeline
   useEffect(() => {
     if (!formRef.current) return
@@ -145,7 +183,16 @@ export default function RegisterPage() {
         </form>
 
         <p className="link-text animate-in">
-          Already have an account? <Link href="/login">Sign in</Link>
+          Already have an account?{' '}
+          <Link
+            href="/login"
+            onClick={(e) => {
+              e.preventDefault()
+              if (!loading) navigateWithTransition('/login')
+            }}
+          >
+            Sign in
+          </Link>
         </p>
       </div>
     </div>
