@@ -58,11 +58,12 @@ export default function LoginPage() {
       // GSAP: slide out before redirect using timeline
       const elements = formRef.current?.querySelectorAll('.animate-in')
       let didRedirect = false
+      const role = data.user?.role
+      const target = role === 'admin' ? '/dashboard/admin' : '/dashboard/user'
       const redirect = () => {
         if (didRedirect) return
         didRedirect = true
-        const role = data.user?.role
-        router.push(role === 'admin' ? '/dashboard/admin' : '/dashboard/user')
+        router.push(target)
       }
 
       const tl = gsap.timeline({ onComplete: redirect })
@@ -90,6 +91,11 @@ export default function LoginPage() {
 
       // Fallback redirect in case the timeline is interrupted
       window.setTimeout(redirect, 700)
+      window.setTimeout(() => {
+        if (window.location.pathname !== target) {
+          window.location.assign(target)
+        }
+      }, 1200)
     } catch {
       setError('Something went wrong. Try again.')
       setLoading(false)
