@@ -60,7 +60,7 @@ export default function LoginPage() {
       const tl = gsap.timeline({
         onComplete: () => {
           const role = data.user?.role
-          router.push(role === 'admin' ? '/dashboard/admin' : '/dashboard/user')
+          window.location.href = role === 'admin' ? '/dashboard/admin' : '/dashboard/user'
         },
       })
 

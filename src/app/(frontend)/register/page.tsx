@@ -59,7 +59,7 @@ export default function RegisterPage() {
 
       const tl = gsap.timeline({
         onComplete: () => {
-          router.push('/login')
+          window.location.href = '/login'
         },
       })
 
